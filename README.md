@@ -10,13 +10,6 @@ The Ingestor program extracts data from a relational database (MariaDB in this e
 - Python 3.x installed on your system ([Download Python](https://www.python.org/downloads/))
 - Elasticsearch installed and configured ([Install Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html))
 
-## Dependencies
-
-Ensure you have the following dependencies installed. You can install them using pip:
-
-```bash
-pip install -r requirements.txt
-```
 ## requirements.txt
 flask
 elasticsearch
