@@ -6,7 +6,7 @@ from elasticsearch.helpers import bulk, BulkIndexError # type: ignore
 import os
 
 
-data_base_name = "nation"
+data_base_name = os.environ.get('DATABASE_NAME')
 URI = "mysql+pymysql://root:@localhost:3307/"
 username=os.environ.get('ELASTIC_USERNAME')
 password = os.environ.get('ELASTIC_PASSWORD')
@@ -24,6 +24,7 @@ client = Elasticsearch(
 database_schema = []
 if client.ping():
     print("Connected to Elasticsearch!")
+
 else:
     print("Could not connect to Elasticsearch!")
     exit()
@@ -41,11 +42,15 @@ def ingest_data_to_elasticsearch(batch_size=500):
             table["columns"]= columns
             database_schema.append(table)
             total_rows = db.session.query(model).count()
+            pk = columns[0] # Assuming that the primary key of the table is the first column
+            doc = {"primary_key": pk } # We will save the name of  the primary key because we will need it for synchronisation
+            client.index(index=data_base_name+"-"+table_name.lower(), document=doc)
             for start in range(0, total_rows, batch_size):
                 rows = db.session.query(model).offset(start).limit(batch_size).all()
                 data = [
                     {
                         '_index': data_base_name +"-"+table_name.lower(),
+                        '_id': getattr(row,pk ),
                         '_source': {col: getattr(row, col) for col in columns}
                     }
                     for row in rows
